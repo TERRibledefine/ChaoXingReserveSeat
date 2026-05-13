@@ -36,14 +36,14 @@ class reserve:
         self.success_times = 0
         self.fail_dict = []
         self.submit_msg = []
-        # 修复：curl_cffi支持的最新版本Chrome 129
-        self.requests = requests.Session(impersonate="chrome129")
+        # 最终稳定版本：curl_cffi 0.6.3 官方支持的最高Chrome版本
+        self.requests = requests.Session(impersonate="chrome120")
         self.token_pattern = re.compile("token = '(.*?)'")
         self.headers = {
             "Referer": "https://office.chaoxing.com/",
             "Host": "captcha.chaoxing.com",
             "Pragma": "no-cache",
-            "Sec-Ch-Ua": '"Google Chrome";v="129", "Chromium";v="129", "Not.A/Brand";v="24"',
+            "Sec-Ch-Ua": '"Google Chrome";v="120", "Chromium";v="120", "Not.A/Brand";v="24"',
             "Sec-Ch-Ua-Mobile": "?0",
             "Sec-Ch-Ua-Platform": '"Windows"',
             "Sec-Fetch-Dest": "document",
@@ -51,7 +51,7 @@ class reserve:
             "Sec-Fetch-Site": "none",
             "Sec-Fetch-User": "?1",
             "Upgrade-Insecure-Requests": "1",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         }
         self.login_headers = {
             "Accept": "application/json, text/javascript, */*; q=0.01",
@@ -59,7 +59,7 @@ class reserve:
             "cache-control": "no-cache",
             "Connection": "keep-alive",
             "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7",
-            "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/129.0.6668.89 Mobile/15E148 Safari/604.1",
+            "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/120.0.6099.119 Mobile/15E148 Safari/604.1",
             "X-Requested-With": "XMLHttpRequest",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             "Host": "passport2.chaoxing.com",
@@ -205,7 +205,7 @@ class reserve:
             "Referer": "https://office.chaoxing.com/",
             "Host": "captcha-b.chaoxing.com",
             "Pragma": "no-cache",
-            "Sec-Ch-Ua": '"Google Chrome";v="129", "Chromium";v="129", "Not.A/Brand";v="24"',
+            "Sec-Ch-Ua": '"Google Chrome";v="120", "Chromium";v="120", "Not.A/Brand";v="24"',
             "Sec-Ch-Ua-Mobile": "?0",
             "Sec-Ch-Ua-Platform": '"Windows"',
             "Sec-Fetch-Dest": "document",
@@ -213,7 +213,7 @@ class reserve:
             "Sec-Fetch-Site": "none",
             "Sec-Fetch-User": "?1",
             "Upgrade-Insecure-Requests": "1",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         }
         bgc, tpc = self.requests.get(bg, headers=c_captcha_headers), self.requests.get(
             tp, headers=c_captcha_headers
