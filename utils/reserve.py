@@ -1,6 +1,6 @@
 from utils import AES_Encrypt, enc, generate_captcha_key, verify_param
 import json
-from curl_cffi import requests  # 替换requests，模拟真实浏览器TLS指纹
+from curl_cffi import requests
 import re
 import time
 import logging
@@ -19,7 +19,7 @@ class reserve:
     def __init__(
         self,
         sleep_time=2,
-        max_attempt=6,  # 限制最大重试次数，避免高频请求
+        max_attempt=6,
         enable_slider=False,
         reserve_next_day=False,
     ):
@@ -36,15 +36,14 @@ class reserve:
         self.success_times = 0
         self.fail_dict = []
         self.submit_msg = []
-        # 模拟Chrome 148真实TLS指纹，核心反检测
-        self.requests = requests.Session(impersonate="chrome148")
+        # 修复：curl_cffi支持的最新版本Chrome 129
+        self.requests = requests.Session(impersonate="chrome129")
         self.token_pattern = re.compile("token = '(.*?)'")
-        # 统一版本号为Chrome 148，无矛盾，平台为Windows（主流用户）
         self.headers = {
             "Referer": "https://office.chaoxing.com/",
             "Host": "captcha.chaoxing.com",
             "Pragma": "no-cache",
-            "Sec-Ch-Ua": '"Google Chrome";v="148", "Chromium";v="148", "Not.A/Brand";v="24"',
+            "Sec-Ch-Ua": '"Google Chrome";v="129", "Chromium";v="129", "Not.A/Brand";v="24"',
             "Sec-Ch-Ua-Mobile": "?0",
             "Sec-Ch-Ua-Platform": '"Windows"',
             "Sec-Fetch-Dest": "document",
@@ -52,16 +51,15 @@ class reserve:
             "Sec-Fetch-Site": "none",
             "Sec-Fetch-User": "?1",
             "Upgrade-Insecure-Requests": "1",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
         }
-        # 正常手机Chrome登录UA，移除异常开发者工具UA
         self.login_headers = {
             "Accept": "application/json, text/javascript, */*; q=0.01",
             "accept-encoding": "gzip, deflate, br, zstd",
             "cache-control": "no-cache",
             "Connection": "keep-alive",
             "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7",
-            "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/148.0.7778.96 Mobile/15E148 Safari/604.1",
+            "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/129.0.6668.89 Mobile/15E148 Safari/604.1",
             "X-Requested-With": "XMLHttpRequest",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             "Host": "passport2.chaoxing.com",
@@ -129,7 +127,6 @@ class reserve:
         logging.info(f"Successfully get prepared captcha_token {captcha_token}")
         logging.info(f"Captcha Image URL-small {tp}, URL-big {bg}")
         x = self.x_distance(bg, tp)
-        # 模拟人类滑块抖动，±3像素随机偏移
         x = x + random.randint(-3, 3)
         logging.info(f"Successfully calculate the captcha distance {x}")
 
@@ -204,12 +201,11 @@ class reserve:
             cropped_image = slider_part[y : y + h, x : x + w]
             return cropped_image
 
-        # 滑块请求头统一版本，无矛盾
         c_captcha_headers = {
             "Referer": "https://office.chaoxing.com/",
             "Host": "captcha-b.chaoxing.com",
             "Pragma": "no-cache",
-            "Sec-Ch-Ua": '"Google Chrome";v="148", "Chromium";v="148", "Not.A/Brand";v="24"',
+            "Sec-Ch-Ua": '"Google Chrome";v="129", "Chromium";v="129", "Not.A/Brand";v="24"',
             "Sec-Ch-Ua-Mobile": "?0",
             "Sec-Ch-Ua-Platform": '"Windows"',
             "Sec-Fetch-Dest": "document",
@@ -217,7 +213,7 @@ class reserve:
             "Sec-Fetch-Site": "none",
             "Sec-Fetch-User": "?1",
             "Upgrade-Insecure-Requests": "1",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
         }
         bgc, tpc = self.requests.get(bg, headers=c_captcha_headers), self.requests.get(
             tp, headers=c_captcha_headers
@@ -235,7 +231,6 @@ class reserve:
         return tl[0]
 
     def submit(self, times, roomid, seatid, action):
-        # 准点后随机延迟0.8~2.5秒，避免毫秒级秒杀特征
         time.sleep(random.uniform(0.8, 2.5))
         for seat in seatid:
             suc = False
@@ -258,7 +253,6 @@ class reserve:
                 )
                 if suc:
                     return suc
-                # 随机间隔1.2~3.8秒，无固定规律
                 time.sleep(random.uniform(1.2, 3.8))
                 self.max_attempt -= 1
         return suc
