@@ -1,6 +1,5 @@
 name: auto_Reserve
 
-# 只保留外部 API 触发，删掉 GitHub 自带的 cron
 on:
   workflow_dispatch:
 
@@ -18,8 +17,11 @@ jobs:
       - name: install dependency
         run: |
           python -m pip install --upgrade pip
-          sudo apt-get install build-essential libssl-dev libffi-dev python3-dev -y
-          pip install cryptography requests opencv-python
+          # 安装系统依赖：修复OpenCV(cv2)在Ubuntu无头环境下的导入错误
+          sudo apt-get update
+          sudo apt-get install build-essential libssl-dev libffi-dev python3-dev libgl1-mesa-glx libglib2.0-0 -y
+          # 新增curl_cffi，保留原有依赖
+          pip install cryptography requests opencv-python curl_cffi
 
       - name: run script
         env:
