@@ -127,7 +127,7 @@ class reserve:
         logging.info(f"Successfully get prepared captcha_token {captcha_token}")
         logging.info(f"Captcha Image URL-small {tp}, URL-big {bg}")
         x = self.x_distance(bg, tp)
-        x = x + random.randint(-3, 3)
+        x = x + random.randint(-2, 2)
         logging.info(f"Successfully calculate the captcha distance {x}")
 
         params = {
@@ -231,7 +231,7 @@ class reserve:
         return tl[0]
 
     def submit(self, times, roomid, seatid, action):
-        time.sleep(random.uniform(0.8, 2.5))
+        time.sleep(random.uniform(0.3, 1.2))
         for seat in seatid:
             suc = False
             while ~suc and self.max_attempt > 0:
@@ -253,7 +253,7 @@ class reserve:
                 )
                 if suc:
                     return suc
-                time.sleep(random.uniform(1.2, 3.8))
+                time.sleep(random.uniform(0.5, 1.5))
                 self.max_attempt -= 1
         return suc
 
