@@ -42,7 +42,7 @@ class reserve:
             "Referer": "https://office.chaoxing.com/",
             "Host": "captcha.chaoxing.com",
             "Pragma": "no-cache",
-            "Sec-Ch-Ua": '"Google Chrome";v="125", "Chromium";v="125", "Not.A/Brand";v="24"',
+            "Sec-Ch-Ua": '"Google Chrome";v="148", "Chromium";v="148", "Not.A/Brand";v="24"',
             "Sec-Ch-Ua-Mobile": "?0",
             "Sec-Ch-Ua-Platform": '"Linux"',
             "Sec-Fetch-Dest": "document",
