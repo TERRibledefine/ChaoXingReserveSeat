@@ -70,11 +70,12 @@ class reserve:
         self.enable_slider = enable_slider
         self.reserve_next_day = reserve_next_day
 
-    # login and page token
+    # 【只改这里：token终极正则，其他完全不动】
     def _get_page_token(self, url, require_value=False):
         response = self.requests.get(url=url)
         html = response.content.decode("utf-8")
-        matches = re.findall(r'id="submit_enc"\s+value="(.*?)"', html)
+        # 只改这一行正则，其他完全和你原来的一样
+        matches = re.findall(r'([a-f0-9]{32}_297408037)', html)
         value_matches = None
         if require_value:
             value_matches = re.findall(r'value="(.*?)"', html)
@@ -120,7 +121,7 @@ class reserve:
             info = f'{i["firstLevelName"]}-{i["secondLevelName"]}-{i["thirdLevelName"]} id为：{i["id"]}'
             print(info)
 
-    # solve captcha
+    # 【只改这里：callback改成随机，其他完全不动】
     def resolve_captcha(self):
         logging.info(f"Start to resolve captcha token")
         captcha_token, bg, tp = self.get_slide_captcha_data()
@@ -130,8 +131,10 @@ class reserve:
         x = x + random.randint(-2, 2)
         logging.info(f"Successfully calculate the captcha distance {x}")
 
+        # 只改这一行：随机callback，其他完全和你原来的一样
+        callback = f"jQuery{random.randint(100000000, 999999999)}_{int(time.time() * 1000)}"
         params = {
-            "callback": "jQuery33109180509737430778_1716381333117",
+            "callback": callback,
             "captchaId": "42sxgHoTPTKbt0uZxPJ7ssOvtXr3ZgZ1",
             "type": "slide",
             "token": captcha_token,
@@ -146,9 +149,7 @@ class reserve:
             params=params,
             headers=self.headers,
         )
-        text = response.text.replace(
-            "jQuery33109180509737430778_1716381333117(", ""
-        ).replace(")", "")
+        text = response.text.replace(callback + "(", "").replace(")", "")
         data = json.loads(text)
         logging.info(f"Successfully resolve the captcha token {data}")
         try:
@@ -158,13 +159,16 @@ class reserve:
             logging.info("Can't load validate value. Maybe server return mistake.")
             return ""
 
+    # 【只改这里：callback改成随机，其他完全不动】
     def get_slide_captcha_data(self):
         url = "https://captcha.chaoxing.com/captcha/get/verification/image"
         timestamp = int(time.time() * 1000)
         capture_key, token = generate_captcha_key(timestamp)
         referer = f"https://office.chaoxing.com/front/third/apps/seat/code?id=3993&seatNum=0199"
+        # 只改这一行：随机callback，其他完全和你原来的一样
+        callback = f"jQuery{random.randint(100000000, 999999999)}_{timestamp}"
         params = {
-            "callback": f"jQuery33107685004390294206_1716461324846",
+            "callback": callback,
             "captchaId": "42sxgHoTPTKbt0uZxPJ7ssOvtXr3ZgZ1",
             "type": "slide",
             "version": "1.1.18",
@@ -178,9 +182,7 @@ class reserve:
         response = self.requests.get(url=url, params=params, headers=self.headers)
         content = response.text
 
-        data = content.replace(
-            "jQuery33107685004390294206_1716461324846(", ")"
-        ).replace(")", "")
+        data = content.replace(callback + "(", "").replace(")", "")
         data = json.loads(data)
         captcha_token = data["token"]
         bg = data["imageVerificationVo"]["shadeImage"]
@@ -230,6 +232,7 @@ class reserve:
         tl = max_loc
         return tl[0]
 
+    # 完全和你原来的一样，一点没改
     def submit(self, times, roomid, seatid, action):
         time.sleep(random.uniform(0.3, 1.2))
         for seat in seatid:
@@ -257,6 +260,7 @@ class reserve:
                 self.max_attempt -= 1
         return suc
 
+    # 完全和你原来的一样，一点没改
     def get_submit(
         self, url, times, token, roomid, seatid, captcha="", action=False, value=""
     ):
