@@ -1,29 +1,37 @@
 name: auto_Reserve
 
-# 只保留外部 API 触发，删掉 GitHub 自带的 cron
+# 手动触发 + 可选定时触发（抢票建议加cron）
 on:
   workflow_dispatch:
+  # 可选：每天早上6点自动抢票（学校一般6/7点放次日票，根据你的学校调整）
+  # schedule:
+  #   - cron: '0 22 * * *'  # UTC时间22点 = 北京时间早上6点
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Python 3.11
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: '3.11'
+          cache: 'pip'
 
-      - name: install dependency
+      - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          sudo apt-get install build-essential libssl-dev libffi-dev python3-dev -y
-          pip install cryptography requests opencv-python
+          sudo apt-get update
+          sudo apt-get install build-essential libssl-dev libffi-dev python3-dev libgl1-mesa-glx -y
+          pip install cryptography requests opencv-python curl_cffi numpy
 
-      - name: run script
+      - name: Run Reserve Script
         env:
           USERNAMES: ${{ secrets.USERNAMES }}
           PASSWORDS: ${{ secrets.PASSWORDS }}
         run: |
-          python main.py -m debug --action
+          # 正式环境：预约后天的座位（抢次日放票）
+          python main.py -m release --action
+          # 调试用：预约明天的座位
+          # python main.py -m debug
