@@ -1,6 +1,5 @@
 name: auto_Reserve
 
-# 完全保留你原来的配置，一点没改
 on:
   workflow_dispatch:
 
@@ -18,14 +17,14 @@ jobs:
       - name: install dependency
         run: |
           python -m pip install --upgrade pip
-          # 只改这里：用opencv-python-headless，不需要任何系统图形依赖，彻底解决包找不到的问题
-          sudo apt-get install build-essential libssl-dev libffi-dev python3-dev -y
-          pip install cryptography requests opencv-python-headless curl_cffi
+          # Ubuntu 24.04 正确包名：libgl1 替代废弃的 libgl1-mesa-glx
+          sudo apt-get update
+          sudo apt-get install build-essential libssl-dev libffi-dev python3-dev libgl1 libglib2.0-0 -y
+          pip install cryptography requests opencv-python curl_cffi
 
       - name: run script
         env:
           USERNAMES: ${{ secrets.USERNAMES }}
           PASSWORDS: ${{ secrets.PASSWORDS }}
         run: |
-          # 完全保留你原来的运行命令
           python main.py -m debug --action
