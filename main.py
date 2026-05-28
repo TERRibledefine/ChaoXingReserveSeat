@@ -24,7 +24,7 @@ get_current_dayofweek = lambda action: (
 
 
 SLEEPTIME = 0.0  # 每次抢座的间隔
-ENDTIME = "07:29:00"  # 根据学校的预约座位时间+1min即可
+ENDTIME = "07:16:00"  # 根据学校的预约座位时间+1min即可
 
 ENABLE_SLIDER = True  # 是否有滑块验证
 MAX_ATTEMPT = 5  # 最大尝试次数
