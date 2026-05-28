@@ -36,11 +36,10 @@ class reserve:
         self.success_times = 0
         self.fail_dict = []
         self.submit_msg = []
-        # 指纹可轮换：chrome120/chrome124/edge101
+        # 指纹可轮换
         self.requests = requests.Session(impersonate="chrome120")
         self.token_pattern = re.compile("token = '(.*?)'")
         
-        # 主请求头（无硬编码Host）
         self.headers = {
             "Referer": "https://office.chaoxing.com/",
             "Pragma": "no-cache",
@@ -54,7 +53,6 @@ class reserve:
             "Upgrade-Insecure-Requests": "1",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         }
-        # 登录请求头（统一UA，与主请求一致）
         self.login_headers = {
             "Accept": "application/json, text/javascript, */*; q=0.01",
             "accept-encoding": "gzip, deflate, br, zstd",
@@ -71,7 +69,6 @@ class reserve:
         self.enable_slider = enable_slider
         self.reserve_next_day = reserve_next_day
 
-    # 通用token提取（无固定UID）
     def _get_page_token(self, url, require_value=False):
         response = self.requests.get(url=url)
         html = response.content.decode("utf-8")
@@ -98,7 +95,7 @@ class reserve:
             "fid": -1,
             "uname": username,
             "password": password,
-            "refer": "https%3A%2F%2Foffice.chaoxing.com%2F",  # 根Referer，无固定座位
+            "refer": "https%3A%2F%2Foffice.chaoxing.com%2F",
             "t": True,
         }
         jsons = self.requests.post(url=self.login_url, params=parm)
@@ -120,7 +117,6 @@ class reserve:
             info = f'{i["firstLevelName"]}-{i["secondLevelName"]}-{i["thirdLevelName"]} id为：{i["id"]}'
             print(info)
 
-    # 获取验证码图片（动态Referer）
     def get_slide_captcha_data(self, current_url=None):
         url = "https://captcha.chaoxing.com/captcha/get/verification/image"
         timestamp = int(time.time() * 1000)
@@ -141,17 +137,28 @@ class reserve:
         }
         response = self.requests.get(url=url, params=params, headers=self.headers)
         content = response.text
-        data = content.replace(callback + "(", "").replace(")", "")
-        data = json.loads(data)
+        # 处理 callback 包装或纯 JSON
+        if content.startswith(callback + '('):
+            json_str = content.replace(callback + "(", "").replace(")", "")
+        else:
+            json_str = content
+        try:
+            data = json.loads(json_str)
+        except json.JSONDecodeError as e:
+            logging.error(f"Captcha response parse error. Raw content: {content[:500]}")
+            raise
         captcha_token = data["token"]
         bg = data["imageVerificationVo"]["shadeImage"]
         tp = data["imageVerificationVo"]["cutoutImage"]
         return captcha_token, bg, tp
 
-    # 解析验证码
     def resolve_captcha(self, current_url=None):
         logging.info(f"Start to resolve captcha token")
-        captcha_token, bg, tp = self.get_slide_captcha_data(current_url)
+        try:
+            captcha_token, bg, tp = self.get_slide_captcha_data(current_url)
+        except Exception as e:
+            logging.error(f"Failed to get captcha data: {e}")
+            return ""
         logging.info(f"Successfully get prepared captcha_token {captcha_token}")
         logging.info(f"Captcha Image URL-small {tp}, URL-big {bg}")
         x = self.x_distance(bg, tp)
@@ -176,7 +183,11 @@ class reserve:
             headers=self.headers,
         )
         text = response.text.replace(callback + "(", "").replace(")", "")
-        data = json.loads(text)
+        try:
+            data = json.loads(text)
+        except json.JSONDecodeError as e:
+            logging.error(f"Captcha check response parse error: {text[:200]}")
+            return ""
         logging.info(f"Successfully resolve the captcha token {data}")
         try:
             validate_val = json.loads(data["extraData"])["validate"]
@@ -185,7 +196,6 @@ class reserve:
             logging.info("Can't load validate value. Maybe server return mistake.")
             return ""
 
-    # 计算滑块距离（无硬编码Host）
     def x_distance(self, bg, tp):
         import numpy as np
         import cv2
@@ -227,7 +237,6 @@ class reserve:
         tl = max_loc
         return tl[0]
 
-    # 提交预约（含空token拦截）
     def submit(self, times, roomid, seatid, action):
         time.sleep(random.uniform(0.3, 1.2))
         for seat in seatid:
